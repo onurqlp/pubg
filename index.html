@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini 2D Shooter Game</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #222; }
+    canvas { display: block; margin: 0 auto; background: #333; }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const playerImage = new Image();
+    playerImage.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Croatian_Army_soldier_%28uniform%29.png/120px-Croatian_Army_soldier_%28uniform%29.png";
+
+    const croatianFlag = new Image();
+    croatianFlag.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Flag_of_Croatia.svg/160px-Flag_of_Croatia.svg.png";
+
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      width: 40,
+      height: 60,
+      speed: 4,
+    };
+
+    const bullets = [];
+    const enemies = [];
+    const keys = {};
+
+    window.addEventListener("keydown", e => keys[e.key] = true);
+    window.addEventListener("keyup", e => keys[e.key] = false);
+
+    canvas.addEventListener("click", e => {
+      const angle = Math.atan2(
+        e.clientY - player.y,
+        e.clientX - player.x
+      );
+      bullets.push({
+        x: player.x,
+        y: player.y,
+        angle,
+        speed: 7
+      });
+    });
+
+    function spawnEnemy() {
+      const x = Math.random() * canvas.width;
+      enemies.push({ x, y: -30, size: 20, speed: 2 });
+    }
+
+    setInterval(spawnEnemy, 1000);
+
+    function update() {
+      if (keys["ArrowUp"]) player.y -= player.speed;
+      if (keys["ArrowDown"]) player.y += player.speed;
+      if (keys["ArrowLeft"]) player.x -= player.speed;
+      if (keys["ArrowRight"]) player.x += player.speed;
+
+      bullets.forEach(b => {
+        b.x += Math.cos(b.angle) * b.speed;
+        b.y += Math.sin(b.angle) * b.speed;
+      });
+
+      enemies.forEach(e => e.y += e.speed);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // player
+      ctx.drawImage(playerImage, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+
+      // name above player
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Edin ist ein King", player.x, player.y - player.height / 2 - 10);
+
+      // croatian flag above name
+      ctx.drawImage(croatianFlag, player.x - 20, player.y - player.height / 2 - 40, 40, 25);
+
+      // bullets
+      ctx.fillStyle = "yellow";
+      bullets.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // enemies
+      ctx.fillStyle = "red";
+      enemies.forEach(e => {
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
