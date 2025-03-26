@@ -21,9 +21,13 @@
     const croatianFlag = new Image();
     croatianFlag.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Flag_of_Croatia.svg/160px-Flag_of_Croatia.svg.png";
 
+    // Oyunun oynanacağı alanı UI için ayırıyoruz.
+    const uiHeight = 50; 
+
     const player = {
+      // Oyuncu başlangıçta UI alanının altında olacak şekilde konumlandırılır.
       x: canvas.width / 2,
-      y: canvas.height / 2,
+      y: uiHeight + (canvas.height - uiHeight) / 2,
       width: 40,
       height: 60,
       speed: 4,
@@ -37,6 +41,7 @@
     window.addEventListener("keyup", e => keys[e.key] = false);
 
     canvas.addEventListener("click", e => {
+      // Fare tıklaması için açı hesaplanırken UI yüksekliği göz önüne alınmaz.
       const angle = Math.atan2(
         e.clientY - player.y,
         e.clientX - player.x
@@ -50,8 +55,9 @@
     });
 
     function spawnEnemy() {
+      // Düşmanlar, UI alanının altından başlaması için y koordinatı UI yüksekliğinden başlatılır.
       const x = Math.random() * canvas.width;
-      enemies.push({ x, y: -30, size: 20, speed: 2 });
+      enemies.push({ x, y: uiHeight - 30, size: 20, speed: 2 });
     }
 
     setInterval(spawnEnemy, 1000);
@@ -73,19 +79,8 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // player
-      ctx.drawImage(playerImage, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
-
-      // name above player
-      ctx.fillStyle = "white";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("Edin ist ein King", player.x, player.y - player.height / 2 - 10);
-
-      // croatian flag above name
-      ctx.drawImage(croatianFlag, player.x - 20, player.y - player.height / 2 - 40, 40, 25);
-
-      // bullets
+      // Oyun alanı çizimleri
+      // Bullets
       ctx.fillStyle = "yellow";
       bullets.forEach(b => {
         ctx.beginPath();
@@ -93,13 +88,25 @@
         ctx.fill();
       });
 
-      // enemies
+      // Enemies
       ctx.fillStyle = "red";
       enemies.forEach(e => {
         ctx.beginPath();
         ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
         ctx.fill();
       });
+
+      // Oyuncu
+      ctx.drawImage(playerImage, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+
+      // UI: Üstte sabit kalan alan (bayrak ve yazı)
+      // Bayrak
+      ctx.drawImage(croatianFlag, canvas.width / 2 - 20, 5, 40, 25);
+      // Yazı
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Edin ist ein King", canvas.width / 2, 40);
     }
 
     function loop() {
